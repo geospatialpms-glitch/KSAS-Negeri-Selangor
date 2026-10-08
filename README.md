@@ -33,3 +33,7 @@ Versi ini menggunakan gaya putih/jingga-merah, navigasi sisi kiri dan susun atur
 
 ## Peta interaktif KSAS
 Peta menggunakan Leaflet 1.9.4 dan peta asas OpenStreetMap (memerlukan internet). Paparan pin mewakili **jumlah rekod bagi kod PBT**, pada **koordinat anggaran pusat pentadbiran/kawasan bandar PBT** dan **bukan lokasi sebenar permohonan**. Penapis dashboard mengubah bilangan pin. Rekod tanpa padanan kod PBT tidak dipetakan dan dilaporkan pada keterangan di atas peta. Nama/singkatan lama PBT boleh berkongsi koordinat yang sama, menyebabkan penanda bertindih. Untuk peta tapak yang tepat, perlukan data koordinat latitud/longitud sebenar bagi setiap permohonan.
+
+
+### Peta sempadan PBT sebenar
+Peta Leaflet menggunakan sempadan 12 PBT daripada fail GeoJSON dibekalkan pengguna. Warna poligon menunjukkan jumlah rekod KSAS bagi PBT yang dipadankan; ia tidak menunjukkan lokasi tepat tapak permohonan. Klik kawasan PBT untuk menapis dashboard. `index.html` telah memasukkan data geometri supaya peta boleh berjalan tanpa permintaan rangkaian tambahan selain library Leaflet dan OpenStreetMap. Untuk menjana semula, simpan fail GeoJSON dan Excel dalam folder yang sama dengan `build_ksas.py`.

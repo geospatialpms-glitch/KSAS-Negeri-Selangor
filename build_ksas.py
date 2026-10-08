@@ -65,40 +65,63 @@ let pcount={};r.forEach(x=>pcount[x.pbt]=(pcount[x.pbt]||0)+1);let orderedPbts=O
 $('tbody').innerHTML=r.slice(0,150).map((x,i)=>{let pbtColor=pbtColorMap[x.pbt]||'#c59067';return '<tr class="tbodyrow"><td>'+esc(x.bil||i+1)+'</td><td>'+x.tahun+'</td><td style="border-left:4px solid '+pbtColor+'"><span class="pbtpill" style="background:'+alpha(pbtColor,'18')+';color:'+pbtColor+';border-color:'+alpha(pbtColor,'55')+'"><span class="swatch" style="background:'+pbtColor+'"></span>'+esc(x.pbt)+'</span></td><td title="'+esc(x.tajuk)+'">'+esc(x.tajuk.slice(0,235))+(x.tajuk.length>235?'…':'')+'</td><td>'+esc(x.pemohon)+'</td><td><span class="pill" style="background:'+(colors[x.status]||'#999')+'20;color:'+(colors[x.status]||'#666')+'">'+esc(x.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="6" class="empty">Tiada rekod ditemui.</td></tr>';$('tableCount').textContent='Memaparkan '+Math.min(r.length,150)+' daripada '+r.length+' rekod ditapis.';refreshKSASMap();}
 function resetFilters(){['search','year','pbt','status'].forEach(id=>$(id).value='');render()}
 function exportCSV(){let header=['Bil','Pemohon','PBT','Tahun','Keputusan','Tajuk','Tarikh Kelulusan'];let cols=['bil','pemohon','pbt','tahun','status','tajuk','kelulusan'];const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';let csv='\ufeff'+[header,...selected().map(r=>cols.map(c=>r[c]))].map(row=>row.map(quote).join(',')).join('\r\n');let blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='Rekod_KSAS_Ditapis.csv';a.click();URL.revokeObjectURL(u)}
-// Leaflet peta PBT: titik hanyalah pusat kawasan bandar/pentadbiran, bukan lokasi permohonan.
-const mapCenters={
- 'MBSA':[3.0738,101.5183,'Shah Alam'], 'MBPJ':[3.1073,101.6070,'Petaling Jaya'],
- 'MBSJ':[3.0430,101.5820,'Subang Jaya'], 'MPSJ':[3.0430,101.5820,'Subang Jaya'],
- 'MPKj':[2.9935,101.7880,'Kajang'], 'MPAJ':[3.1500,101.7610,'Ampang Jaya'],
- 'MPS':[3.2545,101.6540,'Selayang'], 'MPHS':[3.6786,101.5310,'Kuala Kubu Bharu'],
- 'MDHS':[3.6786,101.5310,'Kuala Kubu Bharu'], 'MPSpg':[2.6900,101.7500,'Sepang'],
- 'MPKS':[3.3500,101.2450,'Kuala Selangor'], 'MDKS':[3.3500,101.2450,'Kuala Selangor'],
- 'MPKL':[2.8150,101.5000,'Kuala Langat'], 'MDKL':[2.8150,101.5000,'Kuala Langat'],
- 'MBDK':[3.0397,101.4497,'Klang'], 'MPK':[3.0397,101.4497,'Klang']
+// Sempadan PBT sebenar daripada GeoJSON yang dimuat naik; bukan lokasi tapak individu.
+const pbtBoundaries=__PBT_GEOJSON__;
+const pbtAlias={
+ 'Majlis Daerah Sabak Bernam':['MDSB','MDSB'],
+ 'Majlis Perbandaran Kuala Selangor':['MPKS','MDKS'],
+ 'Majlis Bandaraya Subang Jaya':['MBSJ','MPSJ'],
+ 'Majlis Bandaraya Petaling Jaya':['MBPJ'],
+ 'Majlis Perbandaran Kuala Langat':['MPKL','MDKL'],
+ 'Majlis Perbandaran Hulu Selangor':['MPHS','MDHS'],
+ 'Majlis Perbandaran Sepang':['MPSPG','MPSepang','MPSpg'],
+ 'Majlis Perbandaran Kajang':['MPKJ','MPKj'],
+ 'Majlis Perbandaran Ampang Jaya':['MPAJ'],
+ 'Majlis Perbandaran Selayang':['MPS'],
+ 'Majlis Bandaraya Shah Alam':['MBSA'],
+ 'Majlis Bandaraya Diraja Klang':['MBDK','MPK','MPKLG']
 };
-let ksasMap=null,ksasMapMarkers=null,ksasMapReady=false;
+const normalizePBT=s=>String(s||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+const pbtByCode={};Object.entries(pbtAlias).forEach(([name,codes])=>codes.forEach(code=>pbtByCode[normalizePBT(code)]=name));
+let ksasMap=null,ksasBoundaryLayer=null,ksasMapReady=false;
+function boundaryStats(){
+ const counts={},unknown={};
+ selected().forEach(r=>{let label=pbtByCode[normalizePBT(r.pbt)];if(label)counts[label]=(counts[label]||0)+1;else unknown[r.pbt]=(unknown[r.pbt]||0)+1});
+ return {counts,unknown};
+}
+function boundaryFill(n,max){
+ if(n===0)return '#e9e6df';
+ let f=n/Math.max(1,max);
+ if(f>.75)return '#d83843';
+ if(f>.50)return '#ef7b31';
+ if(f>.25)return '#efad32';
+ if(f>.10)return '#76b770';
+ return '#61a7bb';
+}
 function initKSASMap(){
  if(ksasMapReady||!window.L)return;
  ksasMap=L.map('ksasMap',{scrollWheelZoom:false}).setView([3.17,101.53],9);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom:19
- }).addTo(ksasMap);
- ksasMapMarkers=L.layerGroup().addTo(ksasMap);ksasMapReady=true;refreshKSASMap();
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Sempadan PBT: GeoJSON dibekalkan pengguna',maxZoom:19}).addTo(ksasMap);
+ ksasBoundaryLayer=L.geoJSON(pbtBoundaries,{style:()=>({color:'#fff',weight:1.7,fillColor:'#e9e6df',fillOpacity:.68})}).addTo(ksasMap);
+ ksasMapReady=true;refreshKSASMap();
+ try{ksasMap.fitBounds(ksasBoundaryLayer.getBounds(),{padding:[16,16]})}catch(e){}
  setTimeout(()=>ksasMap.invalidateSize(),150);
 }
 function refreshKSASMap(){
- const filtered=selected(),counts={};filtered.forEach(r=>{counts[r.pbt]=(counts[r.pbt]||0)+1});
- const known=Object.entries(counts).filter(([p])=>mapCenters[p]);
- const missing=Object.entries(counts).filter(([p])=>!mapCenters[p]);
- const mapInfo=$('mapCount');if(mapInfo)mapInfo.textContent=known.reduce((s,x)=>s+x[1],0)+' rekod dipetakan mengikut '+known.length+' kod PBT'+(missing.length?' · '+missing.reduce((s,x)=>s+x[1],0)+' rekod tiada padanan PBT':'')+'.';
+ const {counts,unknown}=boundaryStats();
+ const covered=Object.values(counts).reduce((a,b)=>a+b,0),missing=Object.values(unknown).reduce((a,b)=>a+b,0);
+ const mapInfo=$('mapCount');if(mapInfo)mapInfo.textContent=covered+' rekod dipadankan dengan sempadan '+Object.keys(counts).length+' PBT'+(missing?' · '+missing+' rekod PBT belum dipadankan':'')+'. Klik kawasan pada peta untuk menapis rekod.';
  if(!ksasMapReady)return;
- ksasMapMarkers.clearLayers();
- known.forEach(([p,n])=>{
-  const [lat,lng,area]=mapCenters[p];
-  const pin=L.divIcon({className:'',html:'<div class="map-pin">'+n+'</div>',iconSize:[36,36],iconAnchor:[18,18]});
-  L.marker([lat,lng],{icon:pin,title:p+': '+n+' permohonan (anggaran pusat pentadbiran)'}).addTo(ksasMapMarkers)
-   .bindPopup('<div class="map-popup"><b>'+esc(p)+'</b> — '+esc(area)+'<br><strong>'+n+' permohonan</strong><br><small>Lokasi anggaran PBT, bukan lokasi tapak.</small></div>');
+ const max=Math.max(1,...Object.values(counts));
+ ksasBoundaryLayer.eachLayer(layer=>{
+  const label=layer.feature.properties.NAMA_PBT,n=counts[label]||0,color=boundaryFill(n,max),codes=pbtAlias[label]||[];
+  layer.setStyle({fillColor:color,fillOpacity:n?.7:.4,color:'#ffffff',weight:1.5,opacity:1});
+  layer.unbindTooltip();layer.bindTooltip('<b>'+esc(label)+'</b><br>'+n+' permohonan', {sticky:true});
+  layer.unbindPopup();layer.bindPopup('<b>'+esc(label)+'</b><br><strong>'+n+' permohonan KSAS</strong><br><small>Jumlah mengikut PBT, bukan lokasi tapak individu.</small><br><small>Klik poligon untuk tapis PBT.</small>');
+  layer.off('mouseover');layer.off('mouseout');layer.off('click');
+  layer.on('mouseover',()=>layer.setStyle({weight:3,color:'#263854',fillOpacity:.85}));
+  layer.on('mouseout',()=>layer.setStyle({weight:1.5,color:'#fff',fillOpacity:n?.7:.4}));
+  layer.on('click',()=>{const available=[...$('pbt').options].map(x=>x.value).find(x=>pbtByCode[normalizePBT(x)]===label);if(available){$('pbt').value=available;render()}});
  });
 }
 function loadKSASMap(){
@@ -110,5 +133,9 @@ function loadKSASMap(){
 render();
 loadKSASMap();
 </script></body></html>'''
-pathlib.Path(out).write_text(template.replace('__DATA__',data),encoding='utf-8')
+geojson=json.loads(pathlib.Path('Sempadan Pihak Berkuasa Tempatan Negeri Selangor.geojson').read_text(encoding='utf-8'))
+for feature in geojson['features']:
+ feature['properties']={'NAMA_PBT':feature['properties']['NAMA_PBT']}
+geojson_js=json.dumps(geojson,ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
+pathlib.Path(out).write_text(template.replace('__DATA__',data).replace('__PBT_GEOJSON__',geojson_js),encoding='utf-8')
 print('Dashboard HTML:',out,'Records:',len(records),'Bytes:',pathlib.Path(out).stat().st_size)
