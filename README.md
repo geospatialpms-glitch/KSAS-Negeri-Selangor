@@ -26,3 +26,7 @@ Dashboard interaktif untuk rekod permohonan Kawasan Sensitif Alam Sekitar (KSAS)
 **Perhatian:** `index.html` mengandungi data rekod termasuk nama pemohon dan tajuk permohonan secara terbuka dalam kod sumber. **Semak dan dapatkan kelulusan pelepasan data sebelum menerbitkan repositori sebagai public/GitHub Pages.** Jangan muat naik fail Excel asal jika ia mengandungi butiran terhad/sulit.
 
 **Catatan kualiti data:** Data dibaca daripada helaian pertama dan rekod yang mempunyai tahun 2000–2099. PBT dikekalkan seperti sumber, tanpa penyatuan singkatan lama. Keputusan kosong dipaparkan sebagai 'BELUM DIREKODKAN'. Dashboard bukan rekod keputusan rasmi terkini melainkan sumber dikemas kini.
+
+
+## Tema dashboard
+Versi ini menggunakan gaya putih/jingga-merah, navigasi sisi kiri dan susun atur panel yang diilhamkan oleh imej rujukan. Rekod sebenar dipaparkan tanpa mereka-reka koordinat lokasi. Untuk membina semula, letakkan `REKOD PERMOHONAN KSAS 1.xlsx` dalam folder dan jalankan `python build_ksas.py`.
