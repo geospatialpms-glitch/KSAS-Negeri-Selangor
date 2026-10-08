@@ -85,7 +85,7 @@ function boundaryFill(n,max){
 }
 function initKSASMap(){
  if(ksasMapReady||!window.L)return;
- ksasMap=L.map('ksasMap',{scrollWheelZoom:false}).setView([3.17,101.53],9);
+ ksasMap=L.map('ksasMap',{scrollWheelZoom:true}).setView([3.17,101.53],9);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Sempadan PBT: GeoJSON dibekalkan pengguna',maxZoom:19}).addTo(ksasMap);
  ksasBoundaryLayer=L.geoJSON(pbtBoundaries,{style:()=>({color:'#fff',weight:1.7,fillColor:'#e9e6df',fillOpacity:.68})}).addTo(ksasMap);
  ksasMapReady=true;refreshKSASMap();
