@@ -37,3 +37,6 @@ Peta menggunakan Leaflet 1.9.4 dan peta asas OpenStreetMap (memerlukan internet)
 
 ### Peta sempadan PBT sebenar
 Peta Leaflet menggunakan sempadan 12 PBT daripada fail GeoJSON dibekalkan pengguna. Warna poligon menunjukkan jumlah rekod KSAS bagi PBT yang dipadankan; ia tidak menunjukkan lokasi tepat tapak permohonan. Klik kawasan PBT untuk menapis dashboard. `index.html` telah memasukkan data geometri supaya peta boleh berjalan tanpa permintaan rangkaian tambahan selain library Leaflet dan OpenStreetMap. Untuk menjana semula, simpan fail GeoJSON dan Excel dalam folder yang sama dengan `build_ksas.py`.
+
+### Logo PBT pada peta
+Peta memaparkan 12 kedudukan logo berdasarkan titik dalaman poligon. 7 logo dirujuk dari Wikimedia Commons; PBT selebihnya memaparkan singkatan sehingga fail PNG rasmi disediakan. Untuk mengisi kesemua logo, tambah `logos/MBSA.png`, `logos/MBPJ.png`, `logos/MBSJ.png`, `logos/MBDK.png`, `logos/MPS.png`, `logos/MPKj.png`, `logos/MPAJ.png`, `logos/MPSp.png`, `logos/MPKL.png`, `logos/MPKS.png`, `logos/MPHS.png`, `logos/MDSB.png`. Pautan Commons memerlukan akses internet.
