@@ -30,3 +30,6 @@ Dashboard interaktif untuk rekod permohonan Kawasan Sensitif Alam Sekitar (KSAS)
 
 ## Tema dashboard
 Versi ini menggunakan gaya putih/jingga-merah, navigasi sisi kiri dan susun atur panel yang diilhamkan oleh imej rujukan. Rekod sebenar dipaparkan tanpa mereka-reka koordinat lokasi. Untuk membina semula, letakkan `REKOD PERMOHONAN KSAS 1.xlsx` dalam folder dan jalankan `python build_ksas.py`.
+
+## Peta interaktif KSAS
+Peta menggunakan Leaflet 1.9.4 dan peta asas OpenStreetMap (memerlukan internet). Paparan pin mewakili **jumlah rekod bagi kod PBT**, pada **koordinat anggaran pusat pentadbiran/kawasan bandar PBT** dan **bukan lokasi sebenar permohonan**. Penapis dashboard mengubah bilangan pin. Rekod tanpa padanan kod PBT tidak dipetakan dan dilaporkan pada keterangan di atas peta. Nama/singkatan lama PBT boleh berkongsi koordinat yang sama, menyebabkan penanda bertindih. Untuk peta tapak yang tepat, perlukan data koordinat latitud/longitud sebenar bagi setiap permohonan.
